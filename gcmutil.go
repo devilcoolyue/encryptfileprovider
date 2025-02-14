@@ -135,7 +135,7 @@ func (c *ConfigCrypto) DecryptWithStringDataWriteFile(encryptedData string) (str
 // DecryptWithString 解密 Base64 编码的加密字符串，返回明文字符串
 func (c *ConfigCrypto) DecryptWithString(encryptedData string) (string, error) {
 	// Base64 解码
-	decodedData, err := base64.StdEncoding.DecodeString(encryptedData)
+	decodedData, err := decodeBase64(encryptedData)
 	if err != nil {
 		return "", fmt.Errorf("base64 解码失败: %w", err)
 	}
