@@ -1,4 +1,4 @@
-module go.opentelemetry.io/collector/confmap/provider/encryptfileprovider
+module github.com/devilcoolyue/encryptfileprovider
 
 go 1.22.0
 
