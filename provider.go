@@ -6,6 +6,7 @@ package encryptfileprovider // import "go.opentelemetry.io/collector/confmap/pro
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,6 +52,8 @@ func (fmp *provider) Retrieve(_ context.Context, uri string, _ confmap.WatcherFu
 		return nil, fmt.Errorf("unable to read the file %v: %w", uri, err)
 	}
 
+	log.Default().Printf("读取文件成功: \n%s", string(content))
+
 	// 解码器初始化
 	crypto, err := NewConfigCrypto(fixedKey, fixedIV)
 	if err != nil {
@@ -62,6 +65,8 @@ func (fmp *provider) Retrieve(_ context.Context, uri string, _ confmap.WatcherFu
 	if err != nil {
 		return nil, fmt.Errorf("解码失败: %v", err)
 	}
+
+	log.Default().Printf("解码成功")
 
 	return confmap.NewRetrievedFromYAML(decrypt)
 }
