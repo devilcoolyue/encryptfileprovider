@@ -1,0 +1,235 @@
+exporters:
+    otlp:
+        endpoint: 192.168.2.230:2025
+        tls:
+            insecure: true
+processors:
+    batch:
+        timeout: 200ms
+        send_batch_size: 8096
+    resource/insertCommon:
+        attributes:
+            - key: host.ip
+              value: 192.168.2.60
+              action: insert
+            - key: tenant.id
+              value: "811003563"
+              action: insert
+            - key: system.code
+              value: otel-apm-test
+              action: insert
+            - key: data.source
+              value: oneagent
+              action: insert
+    resource/insertIaas:
+        attributes:
+            - key: obj.id
+              value: host
+              action: insert
+    resource/insertSaas:
+        attributes:
+            - key: obj.id
+              value: service
+              action: insert
+    resourcedetection/system:
+        detectors:
+            - system
+        override: false
+        system:
+            hostname_sources:
+                - os
+receivers:
+    filelog:
+        include:
+            - /var/log/agentUpgrade.log
+            - /var/log/boot.log
+            - /var/log/boot.log-20230915
+            - /var/log/boot.log-20231214
+            - /var/log/boot.log-20240922
+            - /var/log/btmp
+            - /var/log/btmp-20250201
+            - /var/log/cron
+            - /var/log/cron-20250119
+            - /var/log/cron-20250126
+            - /var/log/cron-20250202
+            - /var/log/cron-20250209
+            - /var/log/dmesg
+            - /var/log/dmesg.old
+            - /var/log/firewalld
+            - /var/log/grubby_prune_debug
+            - /var/log/lastlog
+            - /var/log/maillog
+            - /var/log/maillog-20250119
+            - /var/log/maillog-20250126
+            - /var/log/maillog-20250202
+            - /var/log/maillog-20250209
+            - /var/log/messages
+            - /var/log/messages-20250119
+            - /var/log/messages-20250126
+            - /var/log/messages-20250202
+            - /var/log/messages-20250209
+            - /var/log/secure
+            - /var/log/secure-20250119
+            - /var/log/secure-20250126
+            - /var/log/secure-20250202
+            - /var/log/secure-20250209
+            - /var/log/spooler
+            - /var/log/spooler-20250119
+            - /var/log/spooler-20250126
+            - /var/log/spooler-20250202
+            - /var/log/spooler-20250209
+            - /var/log/tallylog
+            - /var/log/vmware-network.1.log
+            - /var/log/vmware-network.2.log
+            - /var/log/vmware-network.3.log
+            - /var/log/vmware-network.4.log
+            - /var/log/vmware-network.5.log
+            - /var/log/vmware-network.6.log
+            - /var/log/vmware-network.7.log
+            - /var/log/vmware-network.8.log
+            - /var/log/vmware-network.9.log
+            - /var/log/vmware-network.log
+            - /var/log/vmware-vgauthsvc.log.0
+            - /var/log/vmware-vmsvc.log
+            - /var/log/wtmp
+            - /var/log/yum.log
+            - /var/log/yum.log-20240101
+            - /var/log/yum.log-20250101
+        include_file_name: true
+        include_file_path: true
+        poll_interval: 200ms
+        start_at: end
+        fingerprint_size: 1000
+        max_log_size: 1048576
+        max_concurrent_files: 1024
+        force_flush_period: 500ms
+        encoding: utf-8
+        retry_on_failure:
+            enabled: false
+            initial_interval: 1s
+            max_interval: 30s
+            max_elapsed_time: 5m0s
+    hostmetrics/oneMinute:
+        collection_interval: 1m0s
+        scrapers:
+            cpu:
+                metrics:
+                    system.cpu.time:
+                        enabled: true
+                    system.cpu.utilization:
+                        enabled: true
+            disk:
+                metrics:
+                    system.disk.io:
+                        enabled: true
+                    system.disk.io_time:
+                        enabled: true
+                    system.disk.merged:
+                        enabled: true
+                    system.disk.operation_time:
+                        enabled: true
+                    system.disk.operations:
+                        enabled: true
+                    system.disk.pending_operations:
+                        enabled: true
+                    system.disk.weighted_io_time:
+                        enabled: true
+            filesystem:
+                metrics:
+                    system.filesystem.inodes.usage:
+                        enabled: true
+                    system.filesystem.usage:
+                        enabled: true
+                    system.filesystem.utilization:
+                        enabled: true
+            load:
+                cpu_average: true
+                metrics:
+                    system.cpu.load_average.15m:
+                        enabled: true
+                    system.cpu.load_average.1m:
+                        enabled: true
+                    system.cpu.load_average.5m:
+                        enabled: true
+            memory:
+                metrics:
+                    system.memory.usage:
+                        enabled: true
+                    system.memory.utilization:
+                        enabled: true
+            network:
+                metrics:
+                    system.network.connections:
+                        enabled: true
+                    system.network.conntrack.count:
+                        enabled: true
+                    system.network.conntrack.max:
+                        enabled: true
+                    system.network.dropped:
+                        enabled: true
+                    system.network.errors:
+                        enabled: true
+                    system.network.io:
+                        enabled: true
+                    system.network.packets:
+                        enabled: true
+            paging:
+                metrics:
+                    system.paging.faults:
+                        enabled: true
+                    system.paging.operations:
+                        enabled: true
+                    system.paging.usage:
+                        enabled: true
+                    system.paging.utilization:
+                        enabled: true
+            processes:
+                metrics:
+                    system.processes.count:
+                        enabled: true
+                    system.processes.created:
+                        enabled: true
+    otlp:
+        protocols:
+            grpc:
+                endpoint: 0.0.0.0:2025
+service:
+    pipelines:
+        logs:
+            receivers:
+                - otlp
+                - filelog
+            processors:
+                - batch
+                - resource/insertCommon
+                - resourcedetection/system
+            exporters:
+                - otlp
+        metrics/iaas:
+            receivers:
+                - hostmetrics/oneMinute
+            processors:
+                - batch
+                - resource/insertCommon
+                - resource/insertIaas
+                - resourcedetection/system
+            exporters:
+                - otlp
+        metrics/saas:
+            receivers:
+                - otlp
+            processors:
+                - batch
+                - resource/insertCommon
+                - resource/insertSaas
+                - resourcedetection/system
+            exporters:
+                - otlp
+        traces:
+            receivers:
+                - otlp
+            processors:
+                - batch
+                - resource/insertCommon
+            exporters:
+                - otlp

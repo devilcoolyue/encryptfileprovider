@@ -55,12 +55,12 @@ func (fmp *provider) Retrieve(_ context.Context, uri string, _ confmap.WatcherFu
 	log.Default().Printf("读取文件成功: \n%s", string(content))
 
 	// 解码器初始化
-	crypto, err := NewConfigCrypto(fixedKey, fixedIV)
+	crypto := NewConfigCrypto(&ConfigParam{})
 	if err != nil {
 		return nil, fmt.Errorf("解码解析器初始化失败: %v", err)
 	}
 	// 解码密文 密文字节  ===>  明文字节
-	decrypt, err := crypto.decrypt(content)
+	decrypt, err := crypto.Decrypt(content)
 
 	if err != nil {
 		return nil, fmt.Errorf("解码失败: %v", err)
